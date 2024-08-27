@@ -13,7 +13,7 @@ export async function signInWithGitProviders(
     const { data, error } = await supabaseClient.auth.signInWithOAuth({
       provider: provider,
       options: {
-        redirectTo: `${import.meta.env.PUBLIC_BASE_URL}${constants.AUTH_REDIRECT_URL}`,
+        redirectTo: `${import.meta.env.PUBLIC_BASE_URL}/auth/callback`,
       },
     })
     if (error) {
