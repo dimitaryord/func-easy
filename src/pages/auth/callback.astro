@@ -1,11 +1,11 @@
 ---
 import Layout from "@/layouts/Layout.astro"
+import { supabaseClient } from "@/supabase/client"
 ---
 
 <Layout title="Authenticating" />
 
-<script type="module">
-  import { supabaseClient } from "@/supabase/client"
+<script type="module" is:inline>
   async function handleAuthCallback() {
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get("code")
@@ -24,6 +24,8 @@ import Layout from "@/layouts/Layout.astro"
       } catch (error) {
         console.error(error)
       }
+    } else {
+      console.error("Authorization code not found")
     }
   }
 
