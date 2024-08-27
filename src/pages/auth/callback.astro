@@ -1,11 +1,11 @@
 ---
 import Layout from "@/layouts/Layout.astro"
-import { supabaseClient } from "@/supabase/client"
 ---
 
 <Layout title="Authenticating" />
 
 <script type="module" is:inline>
+  import { supabaseClient } from "../../supabase/client/index"
   async function handleAuthCallback() {
     const urlFragment = window.location.hash.substring(1)
     const params = new URLSearchParams(urlFragment)
