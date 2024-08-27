@@ -1,0 +1,17 @@
+---
+import "@/styles/globals.css"
+import Layout from "../layouts/Layout.astro"
+import { ConnectWithGitButton } from "@/components/react/connect-git"
+---
+
+<Layout title="Welcome to Func Easy">
+  <ConnectWithGitButton client:load provider="github"
+    >Connect with Github</ConnectWithGitButton
+  >
+  <ConnectWithGitButton client:load provider="gitlab"
+    >Connect with Gitlab</ConnectWithGitButton
+  >
+  <ConnectWithGitButton client:load provider="bitbucket"
+    >Connect with Bitbucket</ConnectWithGitButton
+  >
+</Layout>
