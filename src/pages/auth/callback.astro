@@ -1,0 +1,31 @@
+---
+import Layout from "@/layouts/Layout.astro"
+---
+
+<Layout title="Authenticating" />
+
+<script type="module">
+  import { supabaseClient } from "@/supabase/client"
+  async function handleAuthCallback() {
+    const urlParams = new URLSearchParams(window.location.search)
+    const code = urlParams.get("code")
+    const state = urlParams.get("state")
+
+    if (code) {
+      try {
+        const { error } = await supabaseClient.auth.exchangeCodeForSession(code)
+
+        if (error) {
+          console.error(error)
+          return
+        }
+
+        window.location.href = "/"
+      } catch (error) {
+        console.error(error)
+      }
+    }
+  }
+
+  handleAuthCallback()
+</script>
