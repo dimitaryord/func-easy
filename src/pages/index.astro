@@ -5,13 +5,30 @@ import { ConnectWithGitButton } from "@/components/react/connect-git"
 ---
 
 <Layout title="Welcome to Func Easy">
-  <ConnectWithGitButton client:load provider="github"
-    >Connect with Github</ConnectWithGitButton
-  >
-  <ConnectWithGitButton client:load provider="gitlab"
-    >Connect with Gitlab</ConnectWithGitButton
-  >
-  <ConnectWithGitButton client:load provider="bitbucket"
-    >Connect with Bitbucket</ConnectWithGitButton
-  >
+  <div class="w-full max-w-3xl mx-auto p-4">
+    <h2 class="text-2xl font-bold text-center mb-6 text-foreground">
+      Connect with your preferred Git provider
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <ConnectWithGitButton client:load provider="github" name="Github" />
+      <ConnectWithGitButton
+        image="https://images.ctfassets.net/xz1dnu24egyd/3JZABhkTjUT76LCIclV7sH/17a92be9bce78c2adcc43e23aabb7ca1/gitlab-logo-500.svg"
+        client:load
+        provider="gitlab"
+        name="Gitlab"
+      />
+      <ConnectWithGitButton
+        image="/public/bitbucket-logo.svg"
+        client:load
+        provider="bitbucket"
+        name="Bitbucket"
+      />
+    </div>
+    <p class="text-sm text-center mt-6 text-muted-foreground">
+      By connecting, you agree to our <a
+        href="#"
+        class="text-primary hover:underline">Terms of Service</a
+      > and <a href="#" class="text-primary hover:underline">Privacy Policy</a>.
+    </p>
+  </div>
 </Layout>
