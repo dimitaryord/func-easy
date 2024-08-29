@@ -1,12 +1,11 @@
 ---
 import "@/styles/globals.css"
 import Layout from "../../layouts/Layout.astro"
-import Card from "@/components/Card.astro"
-import RepoChooser from "@/components/_repo-selector.tsx"
+import RepoChooser from "@/pages/repos/_repo-selector"
 ---
 
 <Layout title="Repository List">
   <ul>
-     <RepoChooser client:load />
+    <RepoChooser client:load />
   </ul>
 </Layout>

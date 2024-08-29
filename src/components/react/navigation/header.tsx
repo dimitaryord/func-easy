@@ -17,7 +17,12 @@ export default function Header() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
-              <Zap size={32} className="text-primary filter drop-shadow-lg" />
+              <img
+                width="32"
+                height="32"
+                src="/public/logo.webp"
+                className="size-20 text-primary filter drop-shadow-lg cursor-pointer mt-2"
+              />
             </motion.div>
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-4">
