@@ -1,3 +1,5 @@
 def generate_function():
-    # This function is a placeholder for future code generation
+    print("we are dollar funciton in main.py")
+    for i in range(10):
+        print(i)
     pass
