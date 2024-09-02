@@ -43,7 +43,7 @@ export async function deployToGCS(functionName: string, code: string): Promise<{
     if (bucketName === '') {
         throw new Error('GCS_BUCKET_NAME environment variable is not set');
     }
-    
+
     console.log(`Uploading ${functionName} to GCS bucket ${bucketName} in folder ${folderName}...`);
     const hash = crypto.createHash('md5').update(code).digest('hex');
     const filename = `${folderName}/${functionName}_${hash}.zip`;
@@ -53,7 +53,7 @@ export async function deployToGCS(functionName: string, code: string): Promise<{
 
     try {
         const zip = new JSZip();
-        zip.file(`${functionName}.py`, code);
+        zip.file(`main.py`, code);
         const zipContent = await zip.generateAsync({ type: 'nodebuffer' });
 
         await blob.save(zipContent, {
