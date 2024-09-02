@@ -33,7 +33,7 @@ export async function deployFunctionFromBucket(
     const functionObj = {
         name: functionPath,
         entryPoint: entryPoint,
-        runtime: 'python39', // Updated to a more recent Python runtime
+        runtime: 'python39',
         sourceArchiveUrl: sourceArchiveUrl,
         httpsTrigger: {},
         serviceAccountEmail: process.env.GOOGLE_CLOUD_SERVICE_ACCOUNT_EMAIL,

@@ -53,7 +53,7 @@ export const POST: APIRoute = async ({ request }) => {
         };
       } catch (deployError) {
         console.error(`Error deploying function ${functionName}:`, deployError);
-        throw deployError; // Rethrow to be caught by the outer try-catch
+        throw deployError; 
       }
     });
 
