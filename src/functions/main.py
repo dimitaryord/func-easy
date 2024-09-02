@@ -1,3 +1,6 @@
-def my_generated_function():
-    print("This is a generated Python function.")
-    # Additional functionality can be added here.
+def generate_function():
+    print("we are dollar funciton in main.py")
+    for i in range(10):
+        print(i)
+    pass
+
