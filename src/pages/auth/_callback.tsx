@@ -3,34 +3,38 @@ import { useEffect } from "react"
 
 export function CallbackComponent() {
   useEffect(() => {
-    async function handleAuthCallback() {
-      const urlFragment = window.location.hash.substring(1)
-      const params = new URLSearchParams(urlFragment)
-
-      const accessToken = params.get("access_token")
-      const refreshToken = params.get("refresh_token")
-
-      if (accessToken && refreshToken) {
-        try {
-          const { error } = await supabaseClient.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          })
-
-          if (error) {
-            console.error("Error setting session:", error)
-            return
-          }
-
-          window.location.href = "/"
-        } catch (error) {
-          console.error("Error during authentication:", error)
-        }
-      } else {
-        console.error("Access token not found in the URL fragment")
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const provider = urlParams.get("provider")
+      if (provider) {
+        window.localStorage.setItem("auth_provider", provider)
       }
-    }
-    handleAuthCallback()
+
+      if (session && session.provider_token) {
+        window.localStorage.setItem(
+          `${provider}_oauth_provider_token`,
+          session.provider_token,
+        )
+      }
+
+      if (session && session.provider_refresh_token) {
+        window.localStorage.setItem(
+          `${provider}_oauth_provider_refresh_token`,
+          session.provider_refresh_token,
+        )
+      }
+
+      if (event === "SIGNED_OUT") {
+        const provider = window.localStorage.getItem("auth_provider")
+        window.localStorage.removeItem(`${provider}_oauth_provider_token`)
+        window.localStorage.removeItem(
+          `${provider}_oauth_provider_refresh_token`,
+        )
+        window.localStorage.removeItem("auth_provider")
+      }
+
+      window.location.href = "/projects"
+    })
   })
 
   return <></>

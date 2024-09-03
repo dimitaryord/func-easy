@@ -10,7 +10,12 @@ import { ConnectWithGitButton } from "@/components/react/connect-git"
       Connect with your preferred Git provider
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <ConnectWithGitButton client:load provider="github" name="Github" />
+      <ConnectWithGitButton
+        image="/github-logo.svg"
+        client:load
+        provider="github"
+        name="Github"
+      />
       <ConnectWithGitButton
         image="https://images.ctfassets.net/xz1dnu24egyd/3JZABhkTjUT76LCIclV7sH/17a92be9bce78c2adcc43e23aabb7ca1/gitlab-logo-500.svg"
         client:load
@@ -18,7 +23,7 @@ import { ConnectWithGitButton } from "@/components/react/connect-git"
         name="Gitlab"
       />
       <ConnectWithGitButton
-        image="/public/bitbucket-logo.svg"
+        image="/bitbucket-logo.svg"
         client:load
         provider="bitbucket"
         name="Bitbucket"

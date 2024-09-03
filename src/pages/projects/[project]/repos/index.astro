@@ -1,0 +1,35 @@
+---
+import Layout from "@/layouts/Layout.astro"
+import RepoChooser from "@/pages/projects/[project]/repos/_repo-selector"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+
+const { project } = Astro.params
+---
+
+<Layout title="Repository List">
+  <Breadcrumb className="absolute left-0 px-4 sm:px-6 md:px-8 top-20">
+    <BreadcrumbList>
+      <BreadcrumbItem>
+        <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+      </BreadcrumbItem>
+      <BreadcrumbSeparator />
+      <BreadcrumbItem>
+        <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
+      </BreadcrumbItem>
+      <BreadcrumbSeparator />
+      <BreadcrumbItem>
+        <BreadcrumbPage>Rex</BreadcrumbPage>
+      </BreadcrumbItem>
+    </BreadcrumbList>
+  </Breadcrumb>
+  <ul>
+    <RepoChooser project={project} client:load />
+  </ul>
+</Layout>

@@ -20,8 +20,8 @@ export default function Header() {
               <img
                 width="32"
                 height="32"
-                src="/public/logo.webp"
-                className="size-20 text-primary filter drop-shadow-lg cursor-pointer mt-2"
+                src="/logo.webp"
+                className="size-20 text-primary filter drop-shadow-lg mt-2"
               />
             </motion.div>
             <div className="hidden md:block">
@@ -29,7 +29,7 @@ export default function Header() {
                 {navItems.map(item => (
                   <motion.a
                     key={item}
-                    href="#"
+                    href={`/${item.at(0)?.toLowerCase() + item.slice(1)}`}
                     className="relative px-3 py-2 rounded-md text-sm font-medium hover:bg-muted transition duration-300 ease-in-out"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -48,7 +48,7 @@ export default function Header() {
           </div>
           <div className="hidden md:block">
             <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition duration-300 ease-in-out transform hover:scale-105">
-              Start Now
+              <a href="/">Start Now</a>
             </button>
           </div>
           <div className="-mr-2 flex md:hidden">
@@ -64,12 +64,12 @@ export default function Header() {
       </div>
 
       {isOpen && (
-        <div className="md:hidden">
+        <div className="md:hidden z-50 w-screen absolute bg-background">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navItems.map(item => (
               <a
                 key={item}
-                href="#"
+                href={`/${item.at(0)?.toLowerCase() + item.slice(1)}`}
                 className="block px-3 py-2 rounded-md text-base font-medium hover:bg-muted transition duration-300 ease-in-out"
               >
                 {item}
@@ -78,9 +78,11 @@ export default function Header() {
           </div>
           <div className="pt-4 pb-3 border-t border-muted">
             <div className="px-2">
-              <button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-base font-medium transition duration-300 ease-in-out">
-                Connect Git
-              </button>
+              <a href="/">
+                <button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-base font-medium transition duration-300 ease-in-out">
+                  Connect Git
+                </button>
+              </a>
             </div>
           </div>
         </div>
