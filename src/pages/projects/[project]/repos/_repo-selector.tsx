@@ -82,7 +82,7 @@ export default function RepoChooser({ project }: { project?: string }) {
         .update({ repo: selectedRepo.name, provider: provider })
         .eq("name", project)
 
-      window.location.href = `/projects/${project}/create-deployment?repo=${selectedRepo.name}`
+      window.location.href = `/projects/${project}/create-deployment?repo=${provider === "gitlab" ? selectedRepo.id : selectedRepo.full_name}`
     }
   }
 

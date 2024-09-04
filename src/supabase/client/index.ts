@@ -11,7 +11,7 @@ export async function signInWithGitProviders(
   provider: "github" | "gitlab" | "bitbucket",
 ) {
   try {
-    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+    const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: provider,
       options: {
         redirectTo: `${import.meta.env.PUBLIC_BASE_URL}/auth/callback?provider=${provider}`,
@@ -137,4 +137,84 @@ export const fetchBitBucketReposFromWorkspace = async (workspace: string) => {
   )
 
   return repos
+}
+
+export const getGitHubRepoOwner = async (repo: string) => {
+  const accessToken = window.localStorage.getItem("github_oauth_provider_token")
+  console.log("accessToken", accessToken)
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github.v3+json",
+  }
+
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`
+  }
+
+  try {
+    const repoData = await api.get(`https://api.github.com/repos/${repo}`, {
+      headers,
+    })
+    return repoData.owner.login
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      console.error(`Repository not found or no access: ${repo}`)
+      return null
+    }
+    throw error
+  }
+}
+
+export const getGitLabRepoOwner = async (projectId: string) => {
+  const accessToken = window.localStorage.getItem("gitlab_oauth_provider_token")
+  const headers: Record<string, string> = {}
+
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`
+  }
+
+  try {
+    const projectData = await api.get(
+      `https://gitlab.com/api/v4/projects/${projectId}`,
+      {
+        headers,
+      },
+    )
+    return projectData.owner.username
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      console.error(`Project not found or no access: ${projectId}`)
+      return null
+    }
+    throw error
+  }
+}
+
+export const getBitBucketRepoOwner = async (
+  workspace: string,
+  repo: string,
+) => {
+  const accessToken = window.localStorage.getItem(
+    "bitbucket_oauth_provider_token",
+  )
+  const headers: Record<string, string> = {}
+
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`
+  }
+
+  try {
+    const repoData = await api.get(
+      `https://api.bitbucket.org/2.0/repositories/${workspace}/${repo}`,
+      {
+        headers,
+      },
+    )
+    return repoData.owner.username
+  } catch (error: any) {
+    if (error.response && error.response.status === 404) {
+      console.error(`Repository not found or no access: ${repo}`)
+      return null
+    }
+    throw error
+  }
 }

@@ -1,7 +1,12 @@
-import { useState } from "react"
+import api from "@/utils/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  getGitHubRepoOwner,
+  getGitLabRepoOwner,
+  getBitBucketRepoOwner,
+} from "@/supabase/client"
 import {
   Select,
   SelectContent,
@@ -19,58 +24,122 @@ import {
 } from "@/components/ui/tooltip"
 import { InfoIcon } from "lucide-react"
 import EnvironmentVariablesTable from "@/components/react/environment-variables"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+const deploymentSchema = z.object({
+  deploymentName: z.string().min(1, "Deployment name is required"),
+  directory: z.string().default("/"),
+  branchName: z.string().default("main"),
+  framework: z.string().optional(),
+  environmentVariables: z.string().optional(),
+  autoDeployEnabled: z.boolean().default(true),
+})
+
+type DeploymentFormData = z.infer<typeof deploymentSchema>
 
 export default function CreateDeploymentComponent() {
-  const [deploymentName, setDeploymentName] = useState("")
-  const [directory, setDirectory] = useState("")
-  const [framework, setFramework] = useState("")
-  const [buildCommand, setBuildCommand] = useState("")
-  const [outputDirectory, setOutputDirectory] = useState("")
-  const [installCommand, setInstallCommand] = useState("")
-  const [devCommand, setDevCommand] = useState("")
-  const [environmentVariables, setEnvironmentVariables] = useState("")
-  const [autoDeployEnabled, setAutoDeployEnabled] = useState(true)
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log({
-      deploymentName,
-      directory,
-      framework,
-      buildCommand,
-      outputDirectory,
-      installCommand,
-      devCommand,
-      environmentVariables,
-      autoDeployEnabled,
+  const { register, handleSubmit, watch, setValue } =
+    useForm<DeploymentFormData>({
+      resolver: zodResolver(deploymentSchema),
+      defaultValues: {
+        deploymentName: "",
+        directory: "/",
+        branchName: "main",
+        framework: "",
+        environmentVariables: "",
+        autoDeployEnabled: true,
+      },
     })
+
+  const onSubmit = async (data: DeploymentFormData) => {
+    console.log("Submitting deployment data:", data)
+
+    const provider = localStorage.getItem("auth_provider")
+    let owner = ""
+    let token = ""
+
+    const repo = new URLSearchParams(window.location.search).get("repo")
+
+    if (!provider || !repo) {
+      console.error("Provider or repo not found")
+      return
+    }
+
+    switch (provider) {
+      case "github":
+        token = localStorage.getItem("github_oauth_provider_token") || ""
+        owner = await getGitHubRepoOwner(repo)
+        break
+      case "gitlab":
+        token = localStorage.getItem("gitlab_oauth_provider_token") || ""
+        owner = await getGitLabRepoOwner(repo)
+        break
+      case "bitbucket":
+        token = localStorage.getItem("bitbucket_oauth_provider_token") || ""
+        const [workspace, repoName] = repo.split("/")
+        owner = await getBitBucketRepoOwner(workspace, repoName)
+        break
+      default:
+        console.error("Invalid provider")
+        return
+    }
+
+    if (!owner || !token) {
+      console.error("Owner or token not found")
+      return
+    }
+
+    const requestBody = {
+      owner: owner,
+      repo: repo,
+      provider: localStorage.getItem("provider"),
+      branch: data.branchName,
+      token: token,
+      srcFunctionsPath: data.directory,
+    }
+
+    try {
+      await api.post("/api/function-deploy", requestBody, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+    } catch (error) {
+      console.error("Deployment failed:", error)
+    }
   }
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-background text-foreground">
       <h1 className="text-2xl font-bold mb-6">Create New Deployment</h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="deploymentName">Deployment Name</Label>
           <Input
             id="deploymentName"
             placeholder="my-cloud-function"
-            value={deploymentName}
-            onChange={e => setDeploymentName(e.target.value)}
+            {...register("deploymentName")}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="directory">Directory</Label>
+          <Input id="directory" placeholder="/" {...register("directory")} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="branchName">Branch Name</Label>
           <Input
-            id="directory"
-            placeholder="/"
-            value={directory}
-            onChange={e => setDirectory(e.target.value)}
+            id="branchName"
+            placeholder="main"
+            {...register("branchName")}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="framework">Framework Preset</Label>
-          <Select value={framework} onValueChange={setFramework}>
+          <Select
+            value={watch("framework")}
+            onValueChange={value => setValue("framework", value)}
+          >
             <SelectTrigger id="framework">
               <SelectValue placeholder="Select a framework" />
             </SelectTrigger>
@@ -80,48 +149,12 @@ export default function CreateDeploymentComponent() {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="buildCommand">Build Command</Label>
-          <Input
-            id="buildCommand"
-            placeholder="npm run build"
-            value={buildCommand}
-            onChange={e => setBuildCommand(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="outputDirectory">Output Directory</Label>
-          <Input
-            id="outputDirectory"
-            placeholder=".output"
-            value={outputDirectory}
-            onChange={e => setOutputDirectory(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="installCommand">Install Command</Label>
-          <Input
-            id="installCommand"
-            placeholder="npm install"
-            value={installCommand}
-            onChange={e => setInstallCommand(e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="devCommand">Development Command</Label>
-          <Input
-            id="devCommand"
-            placeholder="npm run dev"
-            value={devCommand}
-            onChange={e => setDevCommand(e.target.value)}
-          />
-        </div>
         <EnvironmentVariablesTable />
         <div className="flex items-center space-x-2">
           <Switch
             id="autoDeployEnabled"
-            checked={autoDeployEnabled}
-            onCheckedChange={setAutoDeployEnabled}
+            checked={watch("autoDeployEnabled")}
+            onCheckedChange={checked => setValue("autoDeployEnabled", checked)}
           />
           <Label htmlFor="autoDeployEnabled">Enable Auto Deployment</Label>
           <TooltipProvider>

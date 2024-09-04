@@ -49,16 +49,18 @@ export async function get<T = any>(
 
 export async function post<T = any>(
   url: string,
+  body: object,
   options?: RequestInit,
 ): Promise<T> {
-  return await apiWrapper<T>(url, "POST", undefined, options)
+  return await apiWrapper<T>(url, "POST", body, options)
 }
 
 export async function put<T = any>(
   url: string,
+  body: object,
   options?: RequestInit,
 ): Promise<T> {
-  return await apiWrapper<T>(url, "PUT", undefined, options)
+  return await apiWrapper<T>(url, "PUT", body, options)
 }
 
 export async function del<T = any>(
