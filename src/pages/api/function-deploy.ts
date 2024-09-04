@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
         console.log("Fetching GitHub repo contents")
         files = await getGitHubRepoContents(
           token,
-          srcFunctionsPath,
+          'src/functions',
           branch,
           owner,
           repo,
