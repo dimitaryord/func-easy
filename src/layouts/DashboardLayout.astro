@@ -1,11 +1,6 @@
 ---
-import Header from "@/components/react/navigation/header"
 import { CloudIcon, LayoutDashboardIcon, SettingsIcon } from 'lucide-react'
 import "@/styles/globals.css"
-interface Props {
-  title: string
-}
-
 ---
 
 <!doctype html>
@@ -41,8 +36,6 @@ interface Props {
           </a>
         </nav>
       </aside>
-
-      {/* Main Content */}
       <main class="flex-1 overflow-y-auto">
         <slot />
       </main>
