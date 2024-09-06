@@ -6,6 +6,7 @@ import {
   getGitHubRepoOwner,
   getGitLabRepoOwner,
   getBitBucketRepoOwner,
+  supabaseClient,
 } from "@/supabase/client"
 import {
   Select,
@@ -32,13 +33,25 @@ const deploymentSchema = z.object({
   directory: z.string().default("/"),
   branchName: z.string().default("main"),
   framework: z.string().optional(),
-  environmentVariables: z.string().optional(),
+  environmentVariables: z
+    .array(
+      z.object({
+        key: z.string().min(1, "Environment variable key is required"),
+        value: z.string().min(1, "Environment variable value is required"),
+        type: z.enum(["production", "preview"]).default("production"),
+      }),
+    )
+    .optional(),
   autoDeployEnabled: z.boolean().default(true),
 })
 
 type DeploymentFormData = z.infer<typeof deploymentSchema>
 
-export default function CreateDeploymentComponent() {
+export default function CreateDeploymentComponent({
+  project,
+}: {
+  project: string
+}) {
   const { register, handleSubmit, watch, setValue } =
     useForm<DeploymentFormData>({
       resolver: zodResolver(deploymentSchema),
@@ -46,8 +59,8 @@ export default function CreateDeploymentComponent() {
         deploymentName: "",
         directory: "/",
         branchName: "main",
-        framework: "",
-        environmentVariables: "",
+        framework: "python",
+        environmentVariables: [],
         autoDeployEnabled: true,
       },
     })
@@ -93,7 +106,7 @@ export default function CreateDeploymentComponent() {
     const requestBody = {
       owner: owner,
       repo: repo,
-      provider: localStorage.getItem("provider"),
+      provider: provider,
       branch: data.branchName,
       token: token,
       srcFunctionsPath: data.directory,
@@ -104,6 +117,24 @@ export default function CreateDeploymentComponent() {
         headers: {
           "Content-Type": "application/json",
         },
+      })
+
+      const { data: projectData, error } = await supabaseClient
+        .from("projects")
+        .select()
+        .eq("name", project)
+        .eq("uid", (await supabaseClient.auth.getUser()).data.user?.id)
+        .single()
+
+      if (error) {
+        console.error("Error fetching project data:", error)
+        return
+      }
+
+      await supabaseClient.from("deployments").insert({
+        name: data.deploymentName,
+        status: "Active",
+        project_id: projectData.id,
       })
     } catch (error) {
       console.error("Deployment failed:", error)
@@ -149,7 +180,12 @@ export default function CreateDeploymentComponent() {
             </SelectContent>
           </Select>
         </div>
-        <EnvironmentVariablesTable />
+        <EnvironmentVariablesTable
+          environmentVariables={watch("environmentVariables") || []}
+          setEnvironmentVariables={value =>
+            setValue("environmentVariables", value)
+          }
+        />
         <div className="flex items-center space-x-2">
           <Switch
             id="autoDeployEnabled"

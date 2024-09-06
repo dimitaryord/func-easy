@@ -7,6 +7,18 @@ export const supabaseClient = createClient(
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
 )
 
+function getScopesByProvider(provider: "github" | "gitlab" | "bitbucket") {
+  switch (provider) {
+    case "github":
+      return "repo user"
+    case "gitlab":
+      return "api read_user read_repository read_api"
+    case "bitbucket":
+      return "repository account"
+    default:
+      throw new Error("Invalid provider")
+  }
+}
 export async function signInWithGitProviders(
   provider: "github" | "gitlab" | "bitbucket",
 ) {
@@ -15,7 +27,7 @@ export async function signInWithGitProviders(
       provider: provider,
       options: {
         redirectTo: `${import.meta.env.PUBLIC_BASE_URL}/auth/callback?provider=${provider}`,
-        scopes: "api read_user read_repository read_api",
+        scopes: getScopesByProvider(provider),
       },
     })
     if (error) {
@@ -34,16 +46,22 @@ export const fetchGitHubRepos = async (): Promise<Repository[] | undefined> => {
     return
   }
 
-  const repos = await api.get<Repository[]>(
-    "https://api.github.com/user/repos",
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+  try {
+    const repos = await api.get<Repository[]>(
+      "https://api.github.com/user/repos",
+      {
+        headers: {
+          Accept: "application/vnd.github.v3+json",
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    },
-  )
+    )
 
-  return repos
+    return repos
+  } catch (error) {
+    console.error("Error fetching repositories:", error)
+    return
+  }
 }
 
 export const fetchGitLabProjects = async () => {

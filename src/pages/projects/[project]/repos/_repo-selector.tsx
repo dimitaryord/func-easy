@@ -5,6 +5,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card"
+import { ConnectWithGitButton } from "@/components/react/connect-git"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import type { Repository } from "@/schemas/github"
@@ -21,7 +22,7 @@ type Provider = "github" | "gitlab" | "bitbucket" | null
 export default function RepoChooser({ project }: { project?: string }) {
   const [provider, setProvider] = useState<Provider>(null)
   const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null)
-  const [repos, setRepos] = useState<Repository[] | undefined>([])
+  const [repos, setRepos] = useState<Repository[] | undefined | null>([])
 
   const handleProviderChange = (newProvider: Provider) => {
     setProvider(newProvider)
@@ -44,31 +45,34 @@ export default function RepoChooser({ project }: { project?: string }) {
       if (!provider) {
         return
       }
-
-      if (provider === "github") {
-        const repos = await fetchGitHubRepos()
-        setRepos(repos || [])
-      } else if (provider === "gitlab") {
-        const projects = await fetchGitLabProjects()
-        setRepos(projects || [])
-      } else if (provider === "bitbucket") {
-        const workspaces = await fetchBitBucketWorkspaces()
-        const data = await Promise.all([
-          ...workspaces.values.map(
-            (workspace: { workspace: { name: string } }) =>
-              fetchBitBucketReposFromWorkspace(workspace.workspace.name),
-          ),
-        ])
-        setRepos(
-          data.reduce((acc, val) => {
-            return acc.concat(
-              val.values.map((repo: any) => {
-                repo.id = repo.uuid.replaceAll(/{|}/g, "")
-                return repo
-              }),
-            )
-          }, []),
-        )
+      try {
+        if (provider === "github") {
+          const repos = await fetchGitHubRepos()
+          setRepos(repos || [])
+        } else if (provider === "gitlab") {
+          const projects = await fetchGitLabProjects()
+          setRepos(projects || [])
+        } else if (provider === "bitbucket") {
+          const workspaces = await fetchBitBucketWorkspaces()
+          const data = await Promise.all([
+            ...workspaces.values.map(
+              (workspace: { workspace: { name: string } }) =>
+                fetchBitBucketReposFromWorkspace(workspace.workspace.name),
+            ),
+          ])
+          setRepos(
+            data.reduce((acc, val) => {
+              return acc.concat(
+                val.values.map((repo: any) => {
+                  repo.id = repo.uuid.replaceAll(/{|}/g, "")
+                  return repo
+                }),
+              )
+            }, []),
+          )
+        }
+      } catch (error) {
+        setRepos(null)
       }
     }
 
@@ -79,7 +83,11 @@ export default function RepoChooser({ project }: { project?: string }) {
     if (selectedRepo) {
       await supabaseClient
         .from("projects")
-        .update({ repo: selectedRepo.name, provider: provider })
+        .update({
+          repo:
+            provider === "gitlab" ? selectedRepo.id : selectedRepo.full_name,
+          provider: provider,
+        })
         .eq("name", project)
 
       window.location.href = `/projects/${project}/create-deployment?repo=${provider === "gitlab" ? selectedRepo.id : selectedRepo.full_name}`
@@ -136,21 +144,42 @@ export default function RepoChooser({ project }: { project?: string }) {
       </div>
 
       <ScrollArea className="h-[500px] w-full px-5 mb-8">
-        {repos?.map((repo: Repository) => (
-          <Card
-            key={repo.id}
-            className={`w-[80svw] xl:w-[40svw] cursor-pointer transition-all hover:shadow-md mb-4 mt-2 mx-2 text-white ${selectedRepo?.id === repo.id ? "ring-2 ring-primary" : ""}`}
-            onClick={() => handleRepoSelect(repo)}
-          >
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>{repo.full_name || repo.name}</span>
-              </CardTitle>
-              <CardDescription>{repo.description}</CardDescription>
-              <div className="flex items-center mt-2 text-sm"></div>
-            </CardHeader>
-          </Card>
-        ))}
+        {repos !== null ? (
+          repos?.map((repo: Repository) => (
+            <Card
+              key={repo.id}
+              className={`w-[80svw] xl:w-[40svw] cursor-pointer transition-all hover:shadow-md mb-4 mt-2 mx-2 text-white ${selectedRepo?.id === repo.id ? "ring-2 ring-primary" : ""}`}
+              onClick={() => handleRepoSelect(repo)}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>{repo.full_name || repo.name}</span>
+                </CardTitle>
+                <CardDescription>{repo.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))
+        ) : (
+          <div className="text-center text-gray-500">
+            <ConnectWithGitButton
+              name={
+                provider
+                  ? provider.at(0)?.toUpperCase() + provider.slice(1)
+                  : "GitHub"
+              }
+              image={
+                provider === "github"
+                  ? "/github-logo.svg"
+                  : provider === "gitlab"
+                    ? "https://images.ctfassets.net/xz1dnu24egyd/3JZABhkTjUT76LCIclV7sH/17a92be9bce78c2adcc43e23aabb7ca1/gitlab-logo-500.svg"
+                    : provider === "bitbucket"
+                      ? "/bitbucket-logo.svg"
+                      : undefined
+              }
+              provider={provider || "github"}
+            />
+          </div>
+        )}
       </ScrollArea>
 
       {/* Continue Button */}
