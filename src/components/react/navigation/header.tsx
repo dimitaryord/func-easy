@@ -5,7 +5,7 @@ import { Menu, X, Zap } from "lucide-react"
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
 
-  const navItems = ["Home", "Features", "Pricing", "Contact"]
+  const navItems = ["Home", "Pricing"]
 
   return (
     <header className="bg-background text-foreground">
@@ -18,10 +18,10 @@ export default function Header() {
               whileTap={{ scale: 0.9 }}
             >
               <img
-                width="32"
-                height="32"
-                src="/logo.webp"
-                className="size-20 text-primary filter drop-shadow-lg mt-2"
+                width="64"
+                height="64"
+                src="/logo.png"
+                className="size-24 text-primary filter drop-shadow-lg mt-2"
               />
             </motion.div>
             <div className="hidden md:block">
@@ -29,7 +29,7 @@ export default function Header() {
                 {navItems.map(item => (
                   <motion.a
                     key={item}
-                    href={`/${item.at(0)?.toLowerCase() + item.slice(1)}`}
+                    href={item === "Home" ? "/" : `/${item.at(0)?.toLowerCase() + item.slice(1)}`}
                     className="relative px-3 py-2 rounded-md text-sm font-medium hover:bg-muted transition duration-300 ease-in-out"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}

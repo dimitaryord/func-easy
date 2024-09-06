@@ -1,0 +1,51 @@
+---
+import Header from "@/components/react/navigation/header"
+import { CloudIcon, LayoutDashboardIcon, SettingsIcon } from 'lucide-react'
+import "@/styles/globals.css"
+interface Props {
+  title: string
+}
+
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+  </head>
+  <body class="min-h-screen theme-custom bg-background flex flex-col">
+    
+    <div class="flex h-screen">
+      {/* Sidebar */}
+      <aside class="w-64 bg-card shadow-md">
+        <div class="p-4">
+          <h1 class="text-2xl font-bold text-card-foreground">CloudFuncDash</h1>
+        </div>
+        <nav class="mt-4">
+          <a href="/dashboard" class="flex items-center px-4 py-2 text-foreground bg-muted">
+            <LayoutDashboardIcon className="w-5 h-5 mr-5" />
+            Dashboard
+          </a>
+          <a href="/dashboard/functions" class="flex items-center px-4 py-2 text-foreground hover:bg-muted">
+            <CloudIcon className="w-5 h-5 mr-5" />
+            Functions
+          </a>
+          <a href="/dashboard/settings" class="flex items-center px-4 py-2 text-foreground hover:bg-muted">
+            <SettingsIcon className="w-5 h-5 mr-5" />
+            Settings
+          </a>
+          <a href="/projects" class="flex items-center px-4 py-2 mt-10 text-foreground hover:bg-muted font-semibold">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to Projects
+          </a>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main class="flex-1 overflow-y-auto">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>

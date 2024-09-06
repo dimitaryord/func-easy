@@ -1,14 +1,19 @@
 import { supabaseClient } from "."
 import type { TablesInsert } from "database.types"
+import type { Repository } from "@/schemas/github"
 
 type ProjectInsert = TablesInsert<"projects">
+
+
 
 export async function createProject({
   name,
   description,
+  repository,
 }: {
   name: string
   description: string
+  repository?: Repository
 }) {
   const { error } = await supabaseClient
     .from("projects")
@@ -16,6 +21,7 @@ export async function createProject({
       {
         name: name,
         description: description,
+        repo: repository ? repository.url : null,
       },
     ])
 
@@ -35,3 +41,26 @@ export async function getProjectsForUser() {
 
   return data || []
 }
+
+export async function updateProject({
+  id,
+  name,
+  description,
+  functions,
+}: {
+  id: string
+  name?: string
+  description?: string
+  functions?: { name: string; info: string }[]
+}) {
+  const { error } = await supabaseClient
+    .from("projects")
+    .update({ name, description, functions })
+    .eq("id", id)
+
+  if (error) {
+    console.error("Error updating project:", error)
+    return
+  }
+}
+
